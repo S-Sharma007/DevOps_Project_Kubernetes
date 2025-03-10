@@ -1,5 +1,4 @@
 terraform {
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -7,35 +6,35 @@ terraform {
     }
   }
 
-
   backend "s3" {
-    bucket         = "unique-example-bucket-12345"
+    bucket         = "demo-terraform-eks-state-s3-bucket"
     key            = "terraform.tfstate"
-    region         = "ap-south-1"
-    dynamodb_table = "demo-terraform-eks-state-lock"
+    region         = "us-west-2"
+    dynamodb_table = "terraform-eks-state-locks"
     encrypt        = true
   }
 }
 
 provider "aws" {
-  region = "ap-south-1"
+  region = var.region
 }
 
 module "vpc" {
-  source              = "./module/vpc"
-  vpc_cidr            = var.vpc_cidr
-  availability_zone   = var.vpc.availability_zone
-  private_subnet_cidr = var.vpc.private_subnet_cidr
-  public_subnet_cidr  = var.vpc.public_subnet_cidr
-  cluster_name        = var.cluster_name
+  source = "./modules/vpc"
+
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = var.availability_zones
+  private_subnet_cidrs = var.private_subnet_cidrs
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  cluster_name         = var.cluster_name
 }
 
 module "eks" {
-  source          = "./module/eks"
+  source = "./modules/eks"
+
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
   vpc_id          = module.vpc.vpc_id
-  subnet_ids      = module.vpc.subnet_ids
-  node_groups     = var.eks.node_groups
+  subnet_ids      = module.vpc.private_subnet_ids
+  node_groups     = var.node_groups
 }
-
