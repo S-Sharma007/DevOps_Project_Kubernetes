@@ -20,12 +20,11 @@ variable "subnet_ids" {
 }
 
 variable "node_groups" {
-  description = "EKS node group Configuration"
+  description = "Map of node group definitions"
   type = map(object({
-    capacity_type    = string
-    instance_type    = list(string)
     desired_capacity = number
-    min_size         = number
     max_size         = number
+    min_size         = number
+    instance_type    = string
   }))
 }
